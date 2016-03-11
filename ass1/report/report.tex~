@@ -1,0 +1,190 @@
+% This is "sig-alternate.tex" V2.0 May 2012
+% This file should be compiled with V2.5 of "sig-alternate.cls" May 2012
+%
+% This example file demonstrates the use of the 'sig-alternate.cls'
+% V2.5 LaTeX2e document class file. It is for those submitting
+% articles to ACM Conference Proceedings WHO DO NOT WISH TO
+% STRICTLY ADHERE TO THE SIGS (PUBS-BOARD-ENDORSED) STYLE.
+% The 'sig-alternate.cls' file will produce a similar-looking,
+% albeit, 'tighter' paper resulting in, invariably, fewer pages.
+%
+% ----------------------------------------------------------------------------------------------------------------
+% This .tex file (and associated .cls V2.5) produces:
+%       1) The Permission Statement
+%       2) The Conference (location) Info information
+%       3) The Copyright Line with ACM data
+%       4) NO page numbers
+%
+% as against the acm_proc_article-sp.cls file which
+% DOES NOT produce 1) thru' 3) above.
+%
+% Using 'sig-alternate.cls' you have control, however, from within
+% the source .tex file, over both the CopyrightYear
+% (defaulted to 200X) and the ACM Copyright Data
+% (defaulted to X-XXXXX-XX-X/XX/XX).
+% e.g.
+% \CopyrightYear{2007} will cause 2007 to appear in the copyright line.
+% \crdata{0-12345-67-8/90/12} will cause 0-12345-67-8/90/12 to appear in the copyright line.
+%
+% ---------------------------------------------------------------------------------------------------------------
+% This .tex source is an example which *does* use
+% the .bib file (from which the .bbl file % is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission, you *NEED* to 'insert'
+% your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+%
+% For tracking purposes - this is V2.0 - May 2012
+
+\documentclass{sig-alternate}
+\usepackage{color}
+\usepackage[colorlinks,citecolor=blue]{hyperref}
+\usepackage{url}
+
+\begin{document}
+
+\conferenceinfo{Web Science}{2016 DIKU, Denmark}
+\title{Predicting Vaccination Uptake using Web Search Queries\\WS 2016 Project 1}
+\numberofauthors{1} 
+% \author{
+% \alignauthor 
+% Keep anonymous
+% }
+\maketitle
+
+
+
+\section{Introduction}
+In the previous study of Hansen et al.\cite{H2016}, we observed overall low error when predicting vaccination uptake by means of web-mined data as well as clinical data.
+Following study presents the same experiment but using only the web-mined data using the clinical data as a ground truth.
+We could see in the previous study\cite{H2016} that the error increases only slightly when using web-mined data alone instead of using both web-mined and clinical.
+Further, we explore how significant this error is and how it changes with various data and models.
+We will work with 2 vaccines out of 13 that Hansen et al. originally work with, namely Human papilloma virus (HPV) and vaccine against measles, mumps, and rubella (MMR).
+The web-mined data are represented by the relative counts of how many times people Googled terms regarding specified vaccines.
+We focus on period from January 2011 till December 2015.
+
+\section{Methodology}
+
+\subsection{Query terms}
+First, it is necessary to collect terms that are most relevant to the vaccines.
+We gathered descriptions of the vaccines from the web pages of Statens Serum Institut\footnote{\url{http://www.ssi.dk/}} and the portal for the public Danish Healthcare Services\footnote{\url{https://www.sundhed.dk}}.
+We treated the descriptions as a bag of words and therefore order of the words do not play any role while creating queries.
+The process of creating queries from vaccine descriptions included removing punctuation, converting text to the lower case, removing stopwords, keeping only unique words and finally filtering those words that appeared in the descriptions of both institutions.
+We can emphasize some noteworthy tendencies among the resulting queries.
+Part of the words represent time expressions, for exaple significant year or month for the disease.
+Other words relates to the affected population, symptoms, diagnosis or procedures of treatment.
+We decided not to filter the numbers, since people can also search number queries related to the vaccines and diseases.
+
+\subsection{Obtaining web data}
+The Google Trends\cite{trends} engine provides free access to the data regarding searching on the Google.
+One can specify many parameters of searching, such as location, time period or category.
+The url request for a query is following:
+\url{http://www.google.com/trends/trendsReport?q=query\&date=01/2011\%2060m\&geo=DK\&hl=en-US\&cmpt=q\&content=1\&export=1}
+
+where the important url parameters for us are:
+\begin{itemize}
+  \item[\bf{q}] query term of the vaccine
+  \item[\bf{date}] date to start from (01/2011) and number of months from that date (60)
+  \item[\bf{geo}] two letter code of the country as a geographic specification (DK)  
+\end{itemize}
+The process of scraping data from Google Trends was simple in Python language, since we used the library PyTrends\cite{pytrends}, which provides suitable and easy to understand interface.
+The results contain one number for every week.
+The provided clinical data contains one entry for every month, thus we had to merge weeks into months first.
+One could think that the numbers in the response corresponds to the count of searches of the specified term in the specified time period.
+However, Google normalizes values in the range of 0 and 100 where 100 is a rank of the month, when people searched the term most.
+Therefore, the numbers are prepared for the prediction and we do not have to normalize the data ourselves.
+
+\subsection{Prediction}
+We have collected data about searched queries for each of the 60 months as well as vaccination uptake.
+Now we can predict uptake for specified month only with knowledge of the searched queries and compare it with real vaccination uptake.
+Common aproach to predict continues scalar variable based on one or more independent variables is linear regression.
+There are many models for linear regression but we will work with two of them: Ordinary Least Squares (OLS) and Least Absolute Shrinkage and Selection Operator (LASSO).
+We are working with the Python library scikit learn\cite{scikit}, which is very useful for the machine learning purposes.
+
+
+\subsection{Baseline}
+Before we start to consider intelligent linear regression models, we evaluate RMSE for simple prediction model, which always predict the same uptake, namely the average value of the real uptake accross all the months.
+
+\subsection{Ordinary Least Squares}
+The OLS model tries to fit data points in the n-dimensional space with a line.
+No parameters are necessary to train the OLS model, thus the prediction is straight forward.
+We tested model by means of the cross validation, which means that our data were divided into 5 uniform folds, from which 4 were train set and one was test set.
+We repeated this procedure five times, so that each fold appeared in the test set.
+The final RMSE value is computed as an average of those five evaluation.
+
+\section{Findings}
+- RMSE on training set included
+- 
+
+\subsection{Baseline}
+The table \ref{avg} shows errors for the baseline model.
+
+\begin{table}[h]
+\centering
+\caption{RMSE of the baseline prediction model.}
+\label{avg}
+\begin{tabular}{|c|r|r|} \hline
+Vaccine&Average value&RMSE\\ \hline
+HPV & 40.05 & 16.28\\ \hline
+MMR & 95.25 & 27.27\\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Ordinary Least Squares}
+The table \ref{ols} reveals the results of the prediction for the OLS model.
+The error rate for training set is included for completeness.
+
+\begin{table}[h]
+\centering
+\caption{RMSE of the OLS prediction model.}
+\label{ols}
+\begin{tabular}{|c|r|r|} \hline
+Vaccine&RMSE of train set&RMSE of the test set\\ \hline
+HPV & 3.15 & 25.94\\ \hline
+MMR & 13.21 & 31.96\\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\section{Conclusions}
+Describe your conclusions. 
+
+% \begin{table}
+% \centering
+% \caption{Toy table. Use this as a template for making your own tables.}
+% \begin{tabular}{|c|c|l|} \hline
+% Non-English or Math&Frequency&Comments\\ \hline
+% \O & 1 in 1,000& For Swedish names\\ \hline
+% $\pi$ & 1 in 5& Common in math\\ \hline
+% \$ & 4 in 5 & Used in business\\ \hline
+% $\Psi^2_1$ & 1 in 40,000& Unexplained usage\\
+% \hline\ end{tabular}
+% \end{table}
+%
+% \begin{figure}
+% \centering
+% \epsfig{file=fly.eps}
+% \caption{Toy figure. Use this as a template for making your own figures.}
+% \end{figure}
+
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{citations}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
+%APPENDICES are optional
+%\balancecolumns
+%\appendix
+%Appendix A
+%\balancecolumns % GM June 2007
+% That's all folks!
+\end{document}

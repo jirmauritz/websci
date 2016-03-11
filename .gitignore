@@ -63,4 +63,5 @@ target/
 
 # Report stuff
 *.pdf
-
+**/others/
+*.tar.gz

@@ -1,0 +1,25 @@
+- vytvorit matici
+  Q1 Q2 Q3 .... Qn L
+m1
+m2
+.
+.
+mk
+
+kde Q je dotaz ziskany z Google trends
+kde m je mesic
+kde L je label z clinical dat pro supervised learning - 
+      kolik lidi opravdu slo k doktorovi
+
+
+- takže máme spojený počet vyhledavani s opravdovym uptakem
+- to je ta informace: jak souvisi vyhledavani s uptakem
+- z nekolika samplu (radek v matici) predikujeme dalsi, ale nez to udelam:
+- naucime parametry takto:
+    * cross validation for cyklem pres vsechny mozny parametry modelu (pr.Lasso)
+
+== Report
+- intro: methodology, background, what we will write about, not abou conclusion
+
+== Pred odevzdanim
+- vymazat .backup data
