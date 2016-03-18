@@ -65,3 +65,5 @@ target/
 *.pdf
 **/others/
 *.tar.gz
+*.ad
+ass1/feedback.txt

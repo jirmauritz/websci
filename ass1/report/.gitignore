@@ -22,6 +22,9 @@
 *.mtc1
 *.out
 *.synctex.gz
+*.fdb_latexmk
+*.fls
+*.tex~
 # my
 *.cls
 *.eps
