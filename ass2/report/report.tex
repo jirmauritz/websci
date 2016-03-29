@@ -1,0 +1,231 @@
+% This is "sig-alternate.tex" V2.0 May 2012
+% This file should be compiled with V2.5 of "sig-alternate.cls" May 2012
+%
+% This example file demonstrates the use of the 'sig-alternate.cls'
+% V2.5 LaTeX2e document class file. It is for those submitting
+% articles to ACM Conference Proceedings WHO DO NOT WISH TO
+% STRICTLY ADHERE TO THE SIGS (PUBS-BOARD-ENDORSED) STYLE.
+% The 'sig-alternate.cls' file will produce a similar-looking,
+% albeit, 'tighter' paper resulting in, invariably, fewer pages.
+%
+% ----------------------------------------------------------------------------------------------------------------
+% This .tex file (and associated .cls V2.5) produces:
+%       1) The Permission Statement
+%       2) The Conference (location) Info information
+%       3) The Copyright Line with ACM data
+%       4) NO page numbers
+%
+% as against the acm_proc_article-sp.cls file which
+% DOES NOT produce 1) thru' 3) above.
+%
+% Using 'sig-alternate.cls' you have control, however, from within
+% the source .tex file, over both the CopyrightYear
+% (defaulted to 200X) and the ACM Copyright Data
+% (defaulted to X-XXXXX-XX-X/XX/XX).
+% e.g.
+% \CopyrightYear{2007} will cause 2007 to appear in the copyright line.
+% \crdata{0-12345-67-8/90/12} will cause 0-12345-67-8/90/12 to appear in the copyright line.
+%
+% ---------------------------------------------------------------------------------------------------------------
+% This .tex source is an example which *does* use
+% the .bib file (from which the .bbl file % is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission, you *NEED* to 'insert'
+% your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+%
+% For tracking purposes - this is V2.0 - May 2012
+
+\documentclass{sig-alternate}
+\usepackage{color}
+\usepackage[colorlinks,citecolor=blue]{hyperref}
+\usepackage{url}
+\usepackage{float}
+
+\begin{document}
+
+\conferenceinfo{Web Science}{2016 DIKU, Denmark}
+\title{Sentiment analysis of LEGO reviews\\WS 2016 Project 2}
+\numberofauthors{1} 
+% \author{
+% \alignauthor 
+% Keep anonymous
+% }
+\maketitle
+
+
+
+\section{Introduction}
+The sentiment analysis is well explored branch of natural language processing and machine learning.
+We can mention book {\it Sentiment  Analysis  and  Opinion  Mining} by Bing  Liu. \cite{reading}, which forms the root of knowledge for this study.
+All further terms relalated to the sentiment analysis are deeply described in the book.
+The Stanford NLP Group \cite{stanfnlp} comes with a deep practical understanding of the sentiment analysis in the study {\it Recursive deep models for semantic compositionality over a sentiment treebank} \cite{stanford}.
+They constructed a model for predicting sentiment based on the recursive neural networks (RNN), which we will use to predict our data.
+
+We present experiment based on predicting sentiment of reviews of LEGO blocks.
+The reviews were collected from the website \url{http://brickset.com}, where costumers write their opinions on the LOGO blocks.
+We will train and compare some of the state of the art models for classifications.
+
+\section{Methodology}
+All computations are written in Python programming language using very helpful libraries such as scikit learn\cite{scikit} and numpy\cite{numpy}.
+We describe the experiment in two consecutive sections: feature extraction from the training dataset and prediction based on the state of the art machine learning classification models.
+
+\subsection{Feature extraction}
+Our data consist of $3763$ reviews, where each review has $7.54$ sentences in average.
+Each review is annotated with one of the label POSITIVE, NEUTRAL or NEGATIVE.
+For purposes of the analysis, we had to preprocess the reviews, which includes removing punctuation and converting text to lower case.
+We did not remove the stop words, since a lot of words marked as stopwords help in process of sentiment analysis \cite{reading} (e.g. but, not).
+
+We chose unigrams and bigrams as features for prediction.
+When using the unigrams, the predictor will deduct the sentiment only from the individual words, which could have positive or negative sentiment.
+However, the sentence might be in the negative form, and then unigrams happens to have negative effect on predicting
+For example the word "like" in the sentence "I do not like it." still would have positive sentiment.
+We tried to solved this problem with bigrams, which always consists of two words.
+In the example above, the bigram "not like" would be trained in the model with negative sentiment, which is correct.
+We tried to work with n-grams for greater n, but none of them increased accuracy of prediction, and therefore we used only unigrams together with bigrams.
+
+\subsubsection{Subjectivity Lexicon}
+Our goal is to extract more features about the review, not only the words.
+That was the inspiration for using Subjectivity Lexicon created by MPQA \cite{mpqa}, which was used in the study Recognizing contextual polarity in phrase-level sentiment analysis \cite{lex}.The lexicon contains $8226$ english words with information about the part of speech, subjectivty and, most importantly, sentiment.
+
+We can understand those words as the main discriminators of sentiment and filter out other words in our unigrams and bigrams.
+However, we observed very low accuracy on the data restricted in this manner.
+In fact, the accuracy increased only by 2\% compared to the baseline predictor.
+
+Therefore, we decided to work with all the words and use the lexicon in another way.
+Extra feature computed from the lexicon was added to every review.
+We took the count of all the positive words (according to the lexicon) and substract the count of all the negative numbers.
+
+\subsection{Prediction}
+Provided data are marked with the labels that indicate corresponding sentiment, which means we are able to use the Supervised Machine Learning methods.
+The most common SML classifiers are Decision Trees, Naive Bayes, Neural Networks, Support Vector Machines and K Nearest Neighbors.
+The first two models were predicting with accuracy between $30\%$ and $40\%$, which is below the accuracy of the baseline model.
+The Neural Networs are used in the Stanford Sentiment Analysis application.
+Therefore, we chose the second two models for our prediction of the sentiment.
+
+Support Vector Machines are effective in the high dimensional spaces, which is very convinient for us, since there are many terms (i.e. features) occuring in the reviews.
+We optimized SVM with a floating parameter C by means of the cross validation.
+The C parameter creates a balance between generalization and overfitting.
+
+K Nearest Neighbors method simply stores all the features of the traning reviews, and the predictor assigns sentiment to a tested review  according to sentiments among the most similar reviews.
+As well as in the process of training the SVM, we used the cross validation, this time to optimize the number of neighbors $k$.
+
+Before we started testing the models, we computed accuracy of the training dataset.
+It is always good estimation of the best possible accuracy and it gives some information about generalization of the model.
+
+\subsubsection{Stanford Sentiment Analysis}
+As a comparison to our approach, we performed the sentiment analysis on the model created by The Stanford NLP Group \cite{stanfnlp}.
+The model is already trained on the english language to recognize sentiment of the sentence.
+It classifies sentences with labels positive, neutral and negative.
+Only problem to solve is what sentiment assign to a review, when the sentiment of individual sentences is given.
+The most straight forward approach is to assign positive label to the reviews with all positive or neutral sentences, negative label to reviews with negative or neutral sentences and neutral label to reviews with positive and negative sentences.
+We will refer to this approach as {\it neutral approach} in the findings section.
+The second approach will be refered to as {\it positive} and it is the same as {\it neutral approach}, except that the reviews with mixed sentiments are labeled as positive.
+
+\section{Findings}
+First, we need to mention an accuracy of the random predictor.
+There are three classes for classification, thus the theoretical random predictor have an chance of 33\% to guess a right class.
+We will compare our models to more clever predictor, which computes the majority sentiment among the training set, and predicts always this value.
+The positive sentiment appears in 56\% of all the reviews, and therefore our baseline model has accuracy of the same precentage.
+
+\subsection{Our models}
+We performed prediction on two datasets, with and without the lexicon, which gave us information about how useful is the lexicon.
+We divided dataset to be represented by unigrams or unigrams together with bigrams (in the tables only bigrams).
+The figure \ref{without} shows accuracy for the dataset without the lexicon information about sentiment.
+
+\begin{table}[h]
+\centering
+\caption{Accuracy without the lexicon [\%]}
+\label{without}
+\begin{tabular}{|c|r|r|r|} \hline
+model & training set & testing set  \\ \hline
+SVM unigrams & 68 & 65 \\ \hline
+SVM bigrams & 68 & 65 \\ \hline
+KNN unigrams & 72 & 44 \\ \hline
+KNN bigrams & 72 & 46 \\ \hline
+\end{tabular}
+\end{table}
+
+As we can see, the SVM method achieved better accuracy than the KNN and became practically the only method with the ;accuracy greater than the baseline.
+The accuracy on the training set is very close to the accuracy on the testing set, which means the method generalized very good and performed the best feasible prediction with the given dataset.
+The KNN method, as expected, gives better accuracy on training data, but the accuracy on the testing data is below the baseline.
+The difference in accuracy between datasets of unigrams and bigrams is negligible.
+Apparently, the bigrams do not create as significant distinguishing feature as we expected.
+
+The figure \ref{with} reveals accuracy for the prediction with the usage of the lexicon.
+
+\begin{table}[h]
+\centering
+\caption{Accuracy with the lexicon [\%]}
+\label{with}
+\begin{tabular}{|c|r|r|r|} \hline
+model & training set & testing set  \\ \hline
+SVM unigrams & 69 & 66 \\ \hline
+SVM bigrams & 68 & 66 \\ \hline
+KNN unigrams & 72 & 46 \\ \hline
+KNN bigrams & 72 & 45 \\ \hline
+\end{tabular}
+\end{table}
+
+We can observe a slight improvement in comparison with the first dataset.
+The overall accuracy increased by 1 \% except for the unigram dataset of the KNN method.
+Apparently, the information provided by the lexicon is a distinguishing feature only for very few of the reviews, but it is still relevant and improving attribute for our predicting.
+In this case, the bigram dataset of the KNN method is more successful compared to the unigram dataset.
+
+The tables do not show computed parameters by the cross validation, because they were the same for every dataset.
+Namely, the best value for the parameter $C$ in the SVM method is $1$ and the best value for the parameter $k$ in the KNN method is $5$.
+
+\subsection{Stanford model}
+We present accuracy of the Stanford sentiment analyzator performed on all reviews, because the model is already trained, and thus do not need any training and testing dataset.
+The model uses {\it Recursive Neural Network} as an underlying technology, which is very complex method.
+This could be also the reason for a very poor time performance.
+In fact, the evaluation of all the reviews took 5 hours and 42 minutes, which is very slow in comparison with our models (42 sec).
+
+The table \ref{stanford} shows results for both the {\it neutral} and the {\it positive approach} of composing the overall review sentiment from sentiments of its sentences.
+
+\begin{table}[h]
+\centering
+\caption{Accuracy of the Stanford analyzator [\%]}
+\label{stanford}
+\begin{tabular}{|c|r|r|} \hline
+approach & accuracy  \\ \hline
+neutral & 33 \\ \hline
+positive & 51 \\ \hline
+\end{tabular}
+\end{table}
+
+We can observe a very low accuracy for the {\it neutral approach}, which equals to a random predictor.
+The accuracy of the {\it positive approach} increased compared to the {\it neutral}, but it is still worse than our baseline.
+We can simply explain the greater success of the {\it positive approach}.
+The majority sentiment is positive and the {\it positive approach} chooses positive sentiment in more reviews than the {\it neutral approach}, which makes the predictor more likely to choose the right sentiment.
+
+Even tough we tried other approaches, the {\it positive approach} achieved the best accuracy.
+However, the accuracy is still very low and the model is not very efficient.
+We can assume, that the model is trained on data of different type than we provided, which created confusing states in the predicting.
+
+\section{Conclusions}
+We introduces methods for semantic analysis 
+- nase modely jsou lepsi nez stanford
+
+
+
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{citations}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
+%APPENDICES are optional
+%\balancecolumns
+\appendix
+Appendix A
+%\balancecolumns % GM June 2007
+% That's all folks!
+\end{document}

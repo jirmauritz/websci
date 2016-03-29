@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import codecs
 import csv
+from nltk.stem import WordNetLemmatizer 
+from collections import Counter
 
 DATA_DIR = '../data/'
 RAW = 'data.csv'
@@ -12,7 +14,7 @@ B_MAT = 'first/bigrams.txt'
 REVIEWS = 'second/reviews.txt'
 LABELS = 'first/labels.txt'
 
-FEATURES = 200
+FEATURES = 150
 
 def preprocess():
     # load
@@ -36,6 +38,11 @@ def preprocess():
     lex_sent = lex_sentiment(rews, lex)
     uni_mat['lex'] = lex_sent
     bi_mat['lex'] = lex_sent
+    # subjectivity - no impovement
+    #sub = loadSub()
+    #sub_sent = subjectivity(rews, sub)
+    #uni_mat['sub'] = sub_sent
+    #bi_mat['sub'] = sub_sent
 
     # save matrices
     np.savetxt(DATA_DIR + U_MAT, uni_mat.as_matrix(), fmt='%i')
@@ -46,16 +53,33 @@ def preprocess():
     f.write('\nSTOPWORD\n'.join(rews))
     f.close()
 
-
 def lex_sentiment(rews, lex):
+    lemmatizer = WordNetLemmatizer()
     sentiments = []
     for rew in rews:
         sent = 0
         for word in map(lambda x: removePunctuation(x).lower(), rew.split()):
+            lemma = lemmatizer.lemmatize(word)
             if word in lex:
                 sent += lex[word]
+            if lemma in lex:
+                sent += lex[lemma]
         sentiments.append(sent)
     return sentiments
+
+def subjectivity(rews, sub_lex):
+    lemmatizer = WordNetLemmatizer()
+    subjs = []
+    for rew in rews:
+        sub = 0
+        for word in map(lambda x: removePunctuation(x).lower(), rew.split()):
+            lemma = lemmatizer.lemmatize(word)
+            if word in sub_lex:
+                sub += sub_lex[word]
+            if lemma in sub_lex:
+                sub += sub_lex[lemma]
+        subjs.append(sub)
+    return subjs
 
 
 def grams(rews, lex, min_gram, max_gram):
@@ -64,18 +88,6 @@ def grams(rews, lex, min_gram, max_gram):
     mat = vectorizer.fit_transform(rews)
     df = pd.DataFrame(mat.toarray(), columns = vectorizer.get_feature_names())
     return df
-
-def sentiment(gram, lex):
-    # neg, _, _, _, ... --> negative
-    # pos, 0, 0, ... --> positive
-    # 0, 0 --> neutral
-    lex_labels = map(lambda x: lex[x] if x in lex else 0, gram.split())
-    if -1 in lex_labels:
-        return -1
-    elif 1 in lex_labels:
-        return 1
-    else:
-        return 0
 
 def loadLex():
     lex = {}
@@ -90,6 +102,22 @@ def loadLex():
                 lex[word] = -1
         f.close()
     return lex
+
+def loadSub():
+    sub_lex = {}
+    with open(DATA_DIR + LEX, 'r') as f:
+        for line in f.readlines():
+            # parse word
+            word = line.split()[2][6:]
+            sub = line.split()[0][5]
+            if sub == 'w':
+                # objective
+                sub_lex[word] = -1
+            elif sub == 's':
+                # subjective
+                sub_lex[word] = 1
+        f.close()
+    return sub_lex
 
 
 def removePunctuation(text):

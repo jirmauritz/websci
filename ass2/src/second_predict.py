@@ -18,7 +18,7 @@ def predict():
     labels = np.loadtxt(DATA_DIR + LABELS, dtype=(int))
     # baseline - always predicts majority
     #baseline(labels)
-    annotate()
+    #annotate()
     predict = process_output()
     
     print('method: DEEP_LEARNING, ACC: %.2f' %
@@ -55,16 +55,24 @@ def process_output():
             if line == '  Negative\n':
                 feel.add('neg')
             if line == 'STOPWORD\n':
-                predict.append(_compute_class(feel))
+                predict.append(_compute_class_1(feel))
                 feel = set()
-        predict.append(_compute_class(feel))
+        predict.append(_compute_class_1(feel))
         f.close()
     return predict
 
-def _compute_class(feel):
+def _compute_class_1(feel):
     if 'pos' in feel and 'neg' in feel:
         return 0
     elif 'pos' in feel:
+        return 1
+    elif 'neg' in feel:
+        return -1
+    else:
+        return 0
+
+def _compute_class_2(feel):
+    if 'pos' in feel:
         return 1
     elif 'neg' in feel:
         return -1
