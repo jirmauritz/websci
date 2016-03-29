@@ -6,22 +6,31 @@ from pathlib import Path
 import os
 from datetime import datetime
 
-DATA_DIR = '../data/'
+DATA_DIR = 'data/'
 U_MAT = 'first/unigrams.txt'
 B_MAT = 'first/bigrams.txt'
 LABELS = 'first/labels.txt'
 REVIEWS = 'second/reviews.txt'
 OUTPUT = 'second/output.txt'
+RESULT = 'stanford_res.txt'
 
 def predict():
     # load labels
     labels = np.loadtxt(DATA_DIR + LABELS, dtype=(int))
     # baseline - always predicts majority
-    #baseline(labels)
-    #annotate()
+    baseline(labels)
+
+    # annotate with the Stanford Sentiment Analyzator
+    # !!!!! WARNING !!!!! this could take several hours
+    annotate()
+
+    # predict sentiment from output of the SSA
     predict = process_output()
+
+    # save predictions
+    np.savetxt(DATA_DIR + RESULT, np.array(predict), fmt='%i')
     
-    print('method: DEEP_LEARNING, ACC: %.2f' %
+    print('method: DEEP_LEARNING, ACC: %.3f' %
             (accuracy(predict, labels[0:len(predict)])))
 
 def baseline(labels):
@@ -30,7 +39,7 @@ def baseline(labels):
     Usually, the majority is positive feedback.
     """
     mode = mstats.mode(labels).mode[0]
-    print('method: BASELINE, ACC: %.2f' %
+    print('method: BASELINE, ACC: %.3f' %
             (accuracy([mode]*len(labels), labels)))
 
     print()
@@ -55,13 +64,13 @@ def process_output():
             if line == '  Negative\n':
                 feel.add('neg')
             if line == 'STOPWORD\n':
-                predict.append(_compute_class_1(feel))
+                predict.append(positive_approach(feel))
                 feel = set()
-        predict.append(_compute_class_1(feel))
+        predict.append(positive_approach(feel))
         f.close()
     return predict
 
-def _compute_class_1(feel):
+def neutral_approach(feel):
     if 'pos' in feel and 'neg' in feel:
         return 0
     elif 'pos' in feel:
@@ -71,7 +80,7 @@ def _compute_class_1(feel):
     else:
         return 0
 
-def _compute_class_2(feel):
+def positive_approach(feel):
     if 'pos' in feel:
         return 1
     elif 'neg' in feel:

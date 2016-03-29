@@ -59,13 +59,13 @@
 \section{Introduction}
 The sentiment analysis is well explored branch of natural language processing and machine learning.
 We can mention book {\it Sentiment  Analysis  and  Opinion  Mining} by Bing  Liu. \cite{reading}, which forms the root of knowledge for this study.
-All further terms relalated to the sentiment analysis are deeply described in the book.
+All further terms related to the sentiment analysis are deeply described in the book.
 The Stanford NLP Group \cite{stanfnlp} comes with a deep practical understanding of the sentiment analysis in the study {\it Recursive deep models for semantic compositionality over a sentiment treebank} \cite{stanford}.
 They constructed a model for predicting sentiment based on the recursive neural networks (RNN), which we will use to predict our data.
 
-We present experiment based on predicting sentiment of reviews of LEGO blocks.
+We present an experiment based on the predicting sentiment of reviews of the LEGO blocks.
 The reviews were collected from the website \url{http://brickset.com}, where costumers write their opinions on the LOGO blocks.
-We will train and compare some of the state of the art models for classifications.
+We will train and compare some of the state of the art models for classification and prediction.
 
 \section{Methodology}
 All computations are written in Python programming language using very helpful libraries such as scikit learn\cite{scikit} and numpy\cite{numpy}.
@@ -75,11 +75,11 @@ We describe the experiment in two consecutive sections: feature extraction from 
 Our data consist of $3763$ reviews, where each review has $7.54$ sentences in average.
 Each review is annotated with one of the label POSITIVE, NEUTRAL or NEGATIVE.
 For purposes of the analysis, we had to preprocess the reviews, which includes removing punctuation and converting text to lower case.
-We did not remove the stop words, since a lot of words marked as stopwords help in process of sentiment analysis \cite{reading} (e.g. but, not).
+We did not remove the stop words, since a lot of words marked as stopwords help in process of sentiment analysis (e.g. but, not) \cite{reading}.
 
 We chose unigrams and bigrams as features for prediction.
-When using the unigrams, the predictor will deduct the sentiment only from the individual words, which could have positive or negative sentiment.
-However, the sentence might be in the negative form, and then unigrams happens to have negative effect on predicting
+When using the unigrams, a predictor will deduct a sentiment only from the individual words that are remembered as positive or negative during the training.
+However, the sentence might be in the negative form, and then unigrams happen to have a negative effect on predicting.
 For example the word "like" in the sentence "I do not like it." still would have positive sentiment.
 We tried to solved this problem with bigrams, which always consists of two words.
 In the example above, the bigram "not like" would be trained in the model with negative sentiment, which is correct.
@@ -87,15 +87,16 @@ We tried to work with n-grams for greater n, but none of them increased accuracy
 
 \subsubsection{Subjectivity Lexicon}
 Our goal is to extract more features about the review, not only the words.
-That was the inspiration for using Subjectivity Lexicon created by MPQA \cite{mpqa}, which was used in the study Recognizing contextual polarity in phrase-level sentiment analysis \cite{lex}.The lexicon contains $8226$ english words with information about the part of speech, subjectivty and, most importantly, sentiment.
+That was the inspiration for using Subjectivity Lexicon created by MPQA \cite{mpqa}, which was used in the study {\it Recognizing contextual polarity in phrase-level sentiment analysis} \cite{lex}.The lexicon contains $8226$ english words with information about the part of speech, subjectivty and, most importantly, sentiment.
 
 We can understand those words as the main discriminators of sentiment and filter out other words in our unigrams and bigrams.
 However, we observed very low accuracy on the data restricted in this manner.
 In fact, the accuracy increased only by 2\% compared to the baseline predictor.
 
 Therefore, we decided to work with all the words and use the lexicon in another way.
-Extra feature computed from the lexicon was added to every review.
-We took the count of all the positive words (according to the lexicon) and substract the count of all the negative numbers.
+Extra feature computed from the lexicon was added to every review:
+we took the count of all the positive words (according to the lexicon) and substract the count of all the negative words.
+Now a positive number intuitively denotes positive sentiment and vice versa.
 
 \subsection{Prediction}
 Provided data are marked with the labels that indicate corresponding sentiment, which means we are able to use the Supervised Machine Learning methods.
@@ -111,15 +112,15 @@ The C parameter creates a balance between generalization and overfitting.
 K Nearest Neighbors method simply stores all the features of the traning reviews, and the predictor assigns sentiment to a tested review  according to sentiments among the most similar reviews.
 As well as in the process of training the SVM, we used the cross validation, this time to optimize the number of neighbors $k$.
 
-Before we started testing the models, we computed accuracy of the training dataset.
-It is always good estimation of the best possible accuracy and it gives some information about generalization of the model.
+Before we started testing the models, we had computed accuracy of the training dataset.
+It is always a good estimation of the best possible accuracy and it gives some information about generalization of the model.
 
 \subsubsection{Stanford Sentiment Analysis}
 As a comparison to our approach, we performed the sentiment analysis on the model created by The Stanford NLP Group \cite{stanfnlp}.
 The model is already trained on the english language to recognize sentiment of the sentence.
-It classifies sentences with labels positive, neutral and negative.
-Only problem to solve is what sentiment assign to a review, when the sentiment of individual sentences is given.
-The most straight forward approach is to assign positive label to the reviews with all positive or neutral sentences, negative label to reviews with negative or neutral sentences and neutral label to reviews with positive and negative sentences.
+It classifies sentences with the labels positive, neutral and negative.
+Only problem to solve is what sentiment assign to a review, when the sentiments of individual sentences are given.
+The most straight forward approach is to assign the positive label to the reviews with all positive or neutral sentences, the negative label to reviews with negative or neutral sentences and the neutral label to reviews with positive and negative sentences.
 We will refer to this approach as {\it neutral approach} in the findings section.
 The second approach will be refered to as {\it positive} and it is the same as {\it neutral approach}, except that the reviews with mixed sentiments are labeled as positive.
 
@@ -127,60 +128,59 @@ The second approach will be refered to as {\it positive} and it is the same as {
 First, we need to mention an accuracy of the random predictor.
 There are three classes for classification, thus the theoretical random predictor have an chance of 33\% to guess a right class.
 We will compare our models to more clever predictor, which computes the majority sentiment among the training set, and predicts always this value.
-The positive sentiment appears in 56\% of all the reviews, and therefore our baseline model has accuracy of the same precentage.
+The positive sentiment appears in 56.1 \% of all the reviews, and therefore our baseline model has accuracy of the same precentage.
 
 \subsection{Our models}
 We performed prediction on two datasets, with and without the lexicon, which gave us information about how useful is the lexicon.
-We divided dataset to be represented by unigrams or unigrams together with bigrams (in the tables only bigrams).
-The figure \ref{without} shows accuracy for the dataset without the lexicon information about sentiment.
+We divided dataset to unigrams and unigrams together with bigrams (in the tables only bigrams).
+The figure \ref{without} shows accuracy for the dataset without the lexicon feature.
+The last column denotes a parameter of a model computed by the cross validation, i.e. $C$ for SVM and $k$ for KNN.
 
 \begin{table}[h]
 \centering
 \caption{Accuracy without the lexicon [\%]}
 \label{without}
 \begin{tabular}{|c|r|r|r|} \hline
-model & training set & testing set  \\ \hline
-SVM unigrams & 68 & 65 \\ \hline
-SVM bigrams & 68 & 65 \\ \hline
-KNN unigrams & 72 & 44 \\ \hline
-KNN bigrams & 72 & 46 \\ \hline
+model & training set & testing set & $C$ or $k$  \\ \hline
+SVM unigrams & 67.9 & 65.4 & 1 \\ \hline
+SVM bigrams & 73.7 & 65.3 & 9 \\ \hline
+KNN unigrams & 66.7 & 48.8 & 14 \\ \hline
+KNN bigrams & 65.5 & 47.5 & 12 \\ \hline
 \end{tabular}
 \end{table}
 
-As we can see, the SVM method achieved better accuracy than the KNN and became practically the only method with the ;accuracy greater than the baseline.
-The accuracy on the training set is very close to the accuracy on the testing set, which means the method generalized very good and performed the best feasible prediction with the given dataset.
-The KNN method, as expected, gives better accuracy on training data, but the accuracy on the testing data is below the baseline.
-The difference in accuracy between datasets of unigrams and bigrams is negligible.
-Apparently, the bigrams do not create as significant distinguishing feature as we expected.
+As we can see, the SVM method achieved better accuracy than the KNN and became practically the only method with accuracy greater than the baseline.
+The accuracy on the training set is close to the accuracy on the testing set, which means the method generalized and performed the best feasible prediction with the given dataset.
+The KNN method behaves better for the higher $k$, but its accuracy is below the baseline.
+The difference in accuracy between datasets of unigrams and bigrams is negligible, except for the training set of the SVM model.
+Apparently, the model overfits more bigram than unigram features.
+However, the bigrams do not create as significant distinguishing feature as we expected.
 
-The figure \ref{with} reveals accuracy for the prediction with the usage of the lexicon.
+The figure \ref{with} reveals accuracy for the prediction with the usage of the lexicon features.
 
 \begin{table}[h]
 \centering
 \caption{Accuracy with the lexicon [\%]}
 \label{with}
 \begin{tabular}{|c|r|r|r|} \hline
-model & training set & testing set  \\ \hline
-SVM unigrams & 69 & 66 \\ \hline
-SVM bigrams & 68 & 66 \\ \hline
-KNN unigrams & 72 & 46 \\ \hline
-KNN bigrams & 72 & 45 \\ \hline
+model & training set & testing set  & $C$ or $k$\\ \hline
+SVM unigrams & 70.3 & 66.5 & 2 \\ \hline
+SVM bigrams & 71.6 & 66.3 & 2 \\ \hline
+KNN unigrams & 66.9 & 48.8 & 10\\ \hline
+KNN bigrams & 65.1 & 48 & 14 \\ \hline
 \end{tabular}
 \end{table}
 
-We can observe a slight improvement in comparison with the first dataset.
-The overall accuracy increased by 1 \% except for the unigram dataset of the KNN method.
+We can observe a slight improvement of the SVM model in comparison with the first dataset.
+Accuracy increased cca by 1 \% when considering both the unigrams and the bigrams.
 Apparently, the information provided by the lexicon is a distinguishing feature only for very few of the reviews, but it is still relevant and improving attribute for our predicting.
-In this case, the bigram dataset of the KNN method is more successful compared to the unigram dataset.
-
-The tables do not show computed parameters by the cross validation, because they were the same for every dataset.
-Namely, the best value for the parameter $C$ in the SVM method is $1$ and the best value for the parameter $k$ in the KNN method is $5$.
+We did not notice any significant improvement of the KNN model when using the lexicon.
 
 \subsection{Stanford model}
 We present accuracy of the Stanford sentiment analyzator performed on all reviews, because the model is already trained, and thus do not need any training and testing dataset.
-The model uses {\it Recursive Neural Network} as an underlying technology, which is very complex method.
+The model uses {\it Recursive Neural Network} as an underlying technology, which is a complex method.
 This could be also the reason for a very poor time performance.
-In fact, the evaluation of all the reviews took 5 hours and 42 minutes, which is very slow in comparison with our models (42 sec).
+In fact, the evaluation of all the reviews took 5 hours and 42 minutes, which is very slow in comparison with our models (11 minutes and 23 sec).
 
 The table \ref{stanford} shows results for both the {\it neutral} and the {\it positive approach} of composing the overall review sentiment from sentiments of its sentences.
 
@@ -195,18 +195,29 @@ positive & 51 \\ \hline
 \end{tabular}
 \end{table}
 
-We can observe a very low accuracy for the {\it neutral approach}, which equals to a random predictor.
+We can observe a very low accuracy for the {\it neutral approach}, that equals to a random predictor.
 The accuracy of the {\it positive approach} increased compared to the {\it neutral}, but it is still worse than our baseline.
 We can simply explain the greater success of the {\it positive approach}.
-The majority sentiment is positive and the {\it positive approach} chooses positive sentiment in more reviews than the {\it neutral approach}, which makes the predictor more likely to choose the right sentiment.
+The majority sentiment is positive and the {\it positive approach} chooses positive sentiment for more reviews than the {\it neutral approach}, which makes the predictor more likely to choose the right sentiment.
 
-Even tough we tried other approaches, the {\it positive approach} achieved the best accuracy.
+Even though we tried other approaches, the {\it positive approach} achieved the best accuracy.
 However, the accuracy is still very low and the model is not very efficient.
 We can assume, that the model is trained on data of different type than we provided, which created confusing states in the predicting.
 
 \section{Conclusions}
-We introduces methods for semantic analysis 
-- nase modely jsou lepsi nez stanford
+We introduced a semantic analysis as a branch of the machine learning and descibred methods for predicting a sentiment. 
+First, we performed a feature extraction on the given dataset of reviews, and then applied two algorithms of the supervised machine learning, namely SVM and KNN, to predict a sentiment.
+We used the same data to run predictions by Stanford Sentiment Analyzator, which posseses of already trained model.
+
+The best possible accuracy of 66 \% is achieved by the SVM method using a dataset enriched by the rate of positive and negative words according to the lexicon. 
+That means we are able to predict the right sentiment for two out of three reviews, which is not very high accuracy in measures of the machine learning, but it has great advance compared to a random predictor with a chance of 33 \%.
+The Stanford Sentiment Analyzator achieved as low accuracy as the random predictor, which is surprising, but the training of the model on other data could be the possible explonation.
+
+We discovered, that restricting terms to only sentiment-wise do not help the models predict better.
+Ordinary words apparently help determine the right sentiment, even though they do not have any sentimental meaning at first sight.
+We experienced, how the knowledge of positive and negative words can help predict a sentiment of an entire review.
+These remarks could be used in further studies regarding the sentiment analysis.
+
 
 
 
@@ -224,8 +235,13 @@ We introduces methods for semantic analysis
 %
 %APPENDICES are optional
 %\balancecolumns
+~\newpage
 \appendix
-Appendix A
-%\balancecolumns % GM June 2007
+The code and data are in the directory {\tt src}.
+The script {\tt preprocessing.py} processes file {\tt data.csv} from the {\tt data} directory and outputs matrices needed by both {\tt first\_predict.py} and {\tt second\_predict.py}.
+If the preprocessing is done, the {\tt first\_predict.py} script is able to output accuracy and computed parameters of our models to the standart output and {\tt second\_predict.py} script outputs accuracy of the Stanford Sentiment Analyzator.
+Be aware, that annotation part of the second script may take hours.
+The Stanford NLPCore application needs to be downloaded and located in the {\tt src} directory to run the {\tt second\_predict.py} script.
+% \balancecolumns % GM June 2007
 % That's all folks!
 \end{document}

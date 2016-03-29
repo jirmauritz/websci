@@ -6,12 +6,15 @@ import csv
 from nltk.stem import WordNetLemmatizer 
 from collections import Counter
 
-DATA_DIR = '../data/'
+DATA_DIR = 'data/'
 RAW = 'data.csv'
 LEX = 'sentiment_lexicon/sentiment_lexicon.tff'
 U_MAT = 'first/unigrams.txt'
 B_MAT = 'first/bigrams.txt'
-REVIEWS = 'second/reviews.txt'
+U_MAT_LEX = 'first/unigrams_lex.txt'
+B_MAT_LEX = 'first/bigrams_lex.txt'
+REVIEWS = 'reviews.txt'
+REVIEWS_SND = 'second/reviews.txt'
 LABELS = 'first/labels.txt'
 
 FEATURES = 150
@@ -36,20 +39,28 @@ def preprocess():
     bi_mat = grams(rews, lex, 1, 2)
     # lex sentiment
     lex_sent = lex_sentiment(rews, lex)
-    uni_mat['lex'] = lex_sent
-    bi_mat['lex'] = lex_sent
     # subjectivity - no impovement
     #sub = loadSub()
     #sub_sent = subjectivity(rews, sub)
     #uni_mat['sub'] = sub_sent
     #bi_mat['sub'] = sub_sent
 
-    # save matrices
+    # save matrices without lexicon
     np.savetxt(DATA_DIR + U_MAT, uni_mat.as_matrix(), fmt='%i')
     np.savetxt(DATA_DIR + B_MAT, bi_mat.as_matrix(), fmt='%i')
+    # save matrices with lexicon
+    uni_mat['lex'] = lex_sent
+    bi_mat['lex'] = lex_sent
+    np.savetxt(DATA_DIR + U_MAT_LEX, uni_mat.as_matrix(), fmt='%i')
+    np.savetxt(DATA_DIR + B_MAT_LEX, bi_mat.as_matrix(), fmt='%i')
+    # save labels
     np.savetxt(DATA_DIR + LABELS, labels, fmt='%i')
     # save reviews
     f = open(DATA_DIR + REVIEWS, 'w')
+    f.write('\n'.join(rews))
+    f.close()
+    # save reviews for stanford model
+    f = open(DATA_DIR + REVIEWS_SND, 'w')
     f.write('\nSTOPWORD\n'.join(rews))
     f.close()
 
